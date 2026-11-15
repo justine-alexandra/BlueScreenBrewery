@@ -69,6 +69,8 @@ void connectToWifi() {
   }
 }
 
+void initTopicMappings( const String& payload );
+
 //
 // Connects to MQTT broker.
 //
@@ -158,13 +160,12 @@ void initTopicMappings( const String& payload ) {
       unsigned int GPIO = mapping[PSTR("GPIO")];
       unsigned int channel = numPWMChannels++;
       pinMode(GPIO, OUTPUT);
-      ledcSetup(channel, PWM_FREQUENCY, PWM_RESOLUTION);
-      ledcAttachPin(GPIO, channel);
-      
+      ledcAttachChannel(GPIO, PWM_FREQUENCY, PWM_RESOLUTION, channel);
+
       subscribeTopics[numSubscribeTopics] = [channel](const String & payload, const size_t size) {
         int dutyCyle = payload.toInt();
         if( dutyCyle > -1 && dutyCyle <= MaxPWMDutyCycke )
-          ledcWrite(channel, payload.toInt());
+          ledcWriteChannel(channel, dutyCyle);
       };
 
       subscribeTopicStrings[numSubscribeTopics] = topic;
@@ -301,10 +302,9 @@ void setup() {
   OnewireBegin();
 
   // Setup timer interrupt for counters
-  counterInterrupt = timerBegin( 0, TIMER_PRESCALER, true );
-  timerAttachInterrupt( counterInterrupt, &counterSampler, true );
-  timerAlarmWrite( counterInterrupt, 1000000, true );
-  timerAlarmEnable( counterInterrupt );
+  counterInterrupt = timerBegin( 80000000 / TIMER_PRESCALER ); // Timer frequency in Hz (1 MHz tick with prescaler 80)
+  timerAttachInterrupt( counterInterrupt, &counterSampler );
+  timerAlarm( counterInterrupt, 1000000, true, 0 );            // 1s, auto-reload, unlimited reloads
 
   mqtt.publish( consoleTopic, deviceId + FW_VERSION );
   mqtt.publish(PSTR("BSB/Register"), DEVICE_NAME);

@@ -33,13 +33,13 @@ void BTSensorScanTask( void* param ) {
     pBLEScan->setWindow( 99 );
 
     while( 1 ) {
-        BLEScanResults foundDevices = pBLEScan->start( 9, false );
+        BLEScanResults foundDevices = pBLEScan->getResults( 9000, false ); // Blocking scan, duration in ms
 
         for( uint32_t i = 0; i < foundDevices.getCount(); ++i ) {
-            BLEAdvertisedDevice device = foundDevices.getDevice(i);
-            
-            if( device.haveManufacturerData() == true ) {
-                std::string strManufacturerData = device.getManufacturerData();
+            const BLEAdvertisedDevice* device = foundDevices.getDevice(i);
+
+            if( device->haveManufacturerData() == true ) {
+                std::string strManufacturerData = device->getManufacturerData();
                 unsigned int len = strManufacturerData.length();
                 if( len > 64 )
                     continue;
