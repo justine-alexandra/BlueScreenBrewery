@@ -1,6 +1,6 @@
 # Blue Screen Brewery
 
-* Owner, Primary Developer - Trystan Larey-Williams
+* Owner, Primary Developer - Justine L Alexandra
 * Design Contributor - Stephen Edgington
 
 # 3rd Party Acknowledgements
